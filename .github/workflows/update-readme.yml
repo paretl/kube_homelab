@@ -1,0 +1,51 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '_components/**'
+      - '_scripts/**'
+      - 'config/**'
+      - '.github/workflows/update-readme.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install anthropic
+
+      - name: Generate directory tree
+        run: |
+          ./_scripts/generate_tree.sh > /tmp/tree.txt
+
+      - name: Update README with Claude
+        env:
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: |
+          python ./_scripts/update_readme_with_llm.py
+
+      - name: Auto-commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: auto-update README with current project structure"
+          file_pattern: README.md
+          skip_fetch: false
+          skip_checkout: false

@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: update-readme
+        name: Update README with directory structure
+        entry: ./_scripts/update_readme.sh
+        language: script
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
